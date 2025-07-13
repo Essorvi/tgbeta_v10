@@ -580,18 +580,31 @@ async def handle_callback_query(callback_query: Dict[str, Any]):
     elif data.startswith("buy_"):
         await handle_purchase_callback(chat_id, user, data)
     elif data.startswith("crypto_"):
+        logging.info(f"🤖 CRYPTO CALLBACK: {data}")
         if "_btc" in data or "_eth" in data or "_usdt" in data or "_ltc" in data:
+            logging.info(f"🔍 Найдена криптовалюта в callback: {data}")
+            underscore_count = data.count("_")
+            logging.info(f"📊 Количество подчеркиваний: {underscore_count}")
+            
             if data.count("_") >= 2:  # crypto_btc_100 or crypto_btc_custom format
                 parts = data.split("_")
+                logging.info(f"📝 Части callback: {parts}")
                 crypto_type = parts[1]
                 amount = parts[2]
+                logging.info(f"💰 crypto_type: {crypto_type}, amount: {amount}")
+                
                 if amount == "custom":
+                    logging.info("🔧 Вызываем handle_crypto_custom_amount")
                     await handle_crypto_custom_amount(chat_id, user, crypto_type)
                 else:
+                    logging.info("💳 Вызываем handle_crypto_payment_amount")
                     await handle_crypto_payment_amount(chat_id, user, crypto_type, amount)
             else:  # crypto_btc format
                 crypto_type = data.split("_")[1]
+                logging.info(f"🏠 Вызываем handle_crypto_payment для {crypto_type}")
                 await handle_crypto_payment(chat_id, user, crypto_type)
+        else:
+            logging.warning(f"❌ Неизвестный crypto callback: {data}")
     elif data.startswith("stars_"):
         amount = data.split("_")[1]
         if amount == "custom":
