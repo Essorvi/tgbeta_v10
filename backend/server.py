@@ -181,6 +181,9 @@ def create_admin_menu():
                 {"text": "💳 Платежи", "callback_data": "admin_payments"}
             ],
             [
+                {"text": "📢 Рассылка всем", "callback_data": "admin_broadcast"}
+            ],
+            [
                 {"text": "◀️ Главное меню", "callback_data": "back_to_menu"}
             ]
         ]
