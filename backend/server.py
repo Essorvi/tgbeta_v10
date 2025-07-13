@@ -139,28 +139,34 @@ def detect_search_type(query: str) -> str:
     
     return "🔍 Общий поиск"
 
-def create_main_menu():
+def create_main_menu(is_admin: bool = False):
     """Create main menu keyboard"""
-    return {
-        "inline_keyboard": [
-            [
-                {"text": "🔍 Поиск", "callback_data": "menu_search"},
-                {"text": "👤 Профиль", "callback_data": "menu_profile"}
-            ],
-            [
-                {"text": "💰 Баланс", "callback_data": "menu_balance"},
-                {"text": "🛒 Тарифы", "callback_data": "menu_pricing"}
-            ],
-            [
-                {"text": "🔗 Рефералы", "callback_data": "menu_referral"},
-                {"text": "❓ Помощь", "callback_data": "menu_help"}
-            ],
-            [
-                {"text": "📋 Правила", "callback_data": "menu_rules"},
-                {"text": "💎 Купить поиск (25₽)", "callback_data": "buy_single_search"}
-            ]
+    keyboard = [
+        [
+            {"text": "🔍 Поиск", "callback_data": "menu_search"},
+            {"text": "👤 Профиль", "callback_data": "menu_profile"}
+        ],
+        [
+            {"text": "💰 Баланс", "callback_data": "menu_balance"},
+            {"text": "🛒 Тарифы", "callback_data": "menu_pricing"}
+        ],
+        [
+            {"text": "🔗 Рефералы", "callback_data": "menu_referral"},
+            {"text": "❓ Помощь", "callback_data": "menu_help"}
+        ],
+        [
+            {"text": "📋 Правила", "callback_data": "menu_rules"},
+            {"text": "💎 Купить поиск (25₽)", "callback_data": "buy_single_search"}
         ]
-    }
+    ]
+    
+    # Добавляем админ-панель только для администратора
+    if is_admin:
+        keyboard.append([
+            {"text": "👑 Админ панель", "callback_data": "admin_panel"}
+        ])
+    
+    return {"inline_keyboard": keyboard}
 
 def create_admin_menu():
     """Create admin menu keyboard"""
