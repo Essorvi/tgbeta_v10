@@ -392,9 +392,15 @@ async def send_telegram_message(chat_id: int, text: str, parse_mode: str = "Mark
     
     try:
         response = requests.post(url, json=payload, timeout=10)
-        return response.status_code == 200
+        if response.status_code == 200:
+            logging.info(f"✅ Сообщение отправлено в чат {chat_id}")
+            return True
+        else:
+            error_data = response.json() if response.headers.get('content-type') == 'application/json' else response.text
+            logging.error(f"❌ Ошибка отправки сообщения в чат {chat_id}: {response.status_code} - {error_data}")
+            return False
     except Exception as e:
-        logging.error(f"Failed to send Telegram message: {e}")
+        logging.error(f"❌ Исключение при отправке сообщения в чат {chat_id}: {e}")
         return False
 
 async def get_or_create_user(telegram_id: int, username: str = None, first_name: str = None, last_name: str = None, referral_code: str = None) -> tuple[User, bool]:
