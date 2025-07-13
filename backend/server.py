@@ -1122,6 +1122,8 @@ async def handle_payment_callback(chat_id: int, user: User, data: str):
 
 async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: str, amount: str):
     """Handle crypto payment with specific amount"""
+    logging.info(f"💳 handle_crypto_payment_amount: chat_id={chat_id}, crypto_type={crypto_type}, amount={amount}")
+    
     crypto_names = {
         "btc": "Bitcoin (BTC)",
         "eth": "Ethereum (ETH)", 
@@ -1131,7 +1133,10 @@ async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: st
     
     try:
         amount_float = float(amount)
+        logging.info(f"💰 Конвертированная сумма: {amount_float}")
+        
         if amount_float < 100:
+            logging.warning(f"❌ Сумма слишком мала: {amount_float}")
             await send_telegram_message(
                 chat_id,
                 "❌ Минимальная сумма пополнения: 100 ₽",
@@ -1140,12 +1145,16 @@ async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: st
             return
             
         # Create CryptoBot invoice
+        logging.info(f"🤖 Создаем CryptoBot инвойс для {amount_float} RUB")
         invoice_result = await create_cryptobot_invoice(amount_float, user.telegram_id, currency="RUB")
+        logging.info(f"📋 Результат создания инвойса: {invoice_result}")
         
         if invoice_result.get('ok'):
             invoice_data = invoice_result.get('result', {})
             invoice_url = invoice_data.get('bot_invoice_url')
             invoice_id = invoice_data.get('invoice_id')
+            
+            logging.info(f"✅ Инвойс создан: ID={invoice_id}, URL={invoice_url}")
             
             if invoice_url:
                 wallet_text = f"💰 *ПОПОЛНЕНИЕ ЧЕРЕЗ {crypto_names.get(crypto_type, crypto_type.upper())}*\n\n"
@@ -1162,8 +1171,10 @@ async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: st
                     ]
                 }
                 
+                logging.info("📤 Отправляем сообщение с кнопкой оплаты")
                 await send_telegram_message(chat_id, wallet_text, reply_markup=keyboard)
             else:
+                logging.error("❌ Нет URL инвойса в ответе")
                 await send_telegram_message(
                     chat_id,
                     "❌ Ошибка создания платежа. Попробуйте позже.",
@@ -1171,16 +1182,25 @@ async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: st
                 )
         else:
             error_msg = invoice_result.get('error', {}).get('message', 'Неизвестная ошибка')
+            logging.error(f"❌ Ошибка создания инвойса: {error_msg}")
             await send_telegram_message(
                 chat_id,
                 f"❌ Ошибка создания платежа: {error_msg}",
                 reply_markup=create_back_keyboard()
             )
         
-    except ValueError:
+    except ValueError as e:
+        logging.error(f"❌ Ошибка конвертации суммы: {e}")
         await send_telegram_message(
             chat_id,
             "❌ Неверная сумма",
+            reply_markup=create_back_keyboard()
+        )
+    except Exception as e:
+        logging.error(f"❌ Непредвиденная ошибка в handle_crypto_payment_amount: {e}")
+        await send_telegram_message(
+            chat_id,
+            "❌ Произошла ошибка. Попробуйте позже.",
             reply_markup=create_back_keyboard()
         )
 
