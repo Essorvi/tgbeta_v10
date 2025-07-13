@@ -1206,6 +1206,8 @@ async def handle_crypto_payment_amount(chat_id: int, user: User, crypto_type: st
 
 async def handle_crypto_payment(chat_id: int, user: User, crypto_type: str):
     """Handle crypto payment selection"""
+    logging.info(f"🏠 handle_crypto_payment: chat_id={chat_id}, crypto_type={crypto_type}")
+    
     crypto_names = {
         "btc": "Bitcoin (BTC)",
         "eth": "Ethereum (ETH)", 
